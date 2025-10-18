@@ -19,7 +19,7 @@
     <description>User Management and Authentication Service</description>
     
     <properties>
-        <java.version>17</java.version>
+        <java.version>25</java.version>
         <spring-cloud.version>2024.0.0</spring-cloud.version>
         <jjwt.version>0.12.3</jjwt.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
