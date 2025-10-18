@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query'
 import { productService } from '../services/productService'
 import ProductCard from '../components/ProductCard'
 import { Search, Loader } from 'lucide-react'
+import { motion } from 'framer-motion'
+import FadeInSection from '../components/animations/FadeInSection'
 
 const Products = () => {
   const [page, setPage] = useState(0)
@@ -31,28 +33,42 @@ const Products = () => {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <h1 className="text-4xl font-bold text-gray-900 mb-8">Products</h1>
+      <FadeInSection>
+        <motion.h1 
+          className="text-4xl font-bold text-gray-900 mb-8"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          Products
+        </motion.h1>
+      </FadeInSection>
 
-      <form onSubmit={handleSearch} className="mb-8">
-        <div className="flex gap-2">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search products..."
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            />
+      <FadeInSection delay={0.1}>
+        <form onSubmit={handleSearch} className="mb-8">
+          <div className="flex gap-2">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <motion.input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search products..."
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
+                whileFocus={{ scale: 1.01 }}
+              />
+            </div>
+            <motion.button
+              type="submit"
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Search
+            </motion.button>
           </div>
-          <button
-            type="submit"
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
-          >
-            Search
-          </button>
-        </div>
-      </form>
+        </form>
+      </FadeInSection>
 
       {isLoading ? (
         <div className="flex justify-center items-center py-12">
@@ -73,25 +89,34 @@ const Products = () => {
           )}
 
           {data && data.totalPages > 1 && (
-            <div className="flex justify-center items-center gap-2 mt-8">
-              <button
+            <motion.div 
+              className="flex justify-center items-center gap-2 mt-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <motion.button
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={page === 0}
                 className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 Previous
-              </button>
+              </motion.button>
               <span className="text-gray-700">
                 Page {page + 1} of {data.totalPages}
               </span>
-              <button
+              <motion.button
                 onClick={() => setPage((p) => p + 1)}
                 disabled={page >= data.totalPages - 1}
                 className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 Next
-              </button>
-            </div>
+              </motion.button>
+            </motion.div>
           )}
         </>
       )}

@@ -1,5 +1,8 @@
 version: '3.8'
 
+# Enable BuildKit for better caching and parallel builds
+# Run with: DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker-compose build
+
 services:
   # PostgreSQL Databases
   postgres-user:
@@ -64,6 +67,9 @@ services:
     build:
       context: ./backend/config-server
       dockerfile: Dockerfile
+      cache_from:
+        - config-server:latest
+    image: config-server:latest
     container_name: config-server
     ports:
       - "8888:8888"
@@ -81,6 +87,9 @@ services:
     build:
       context: ./backend/eureka-server
       dockerfile: Dockerfile
+      cache_from:
+        - eureka-server:latest
+    image: eureka-server:latest
     container_name: eureka-server
     ports:
       - "8761:8761"
@@ -101,6 +110,9 @@ services:
     build:
       context: ./backend/user-service
       dockerfile: Dockerfile
+      cache_from:
+        - user-service:latest
+    image: user-service:latest
     container_name: user-service
     ports:
       - "8081:8081"
@@ -123,6 +135,9 @@ services:
     build:
       context: ./backend/product-service
       dockerfile: Dockerfile
+      cache_from:
+        - product-service:latest
+    image: product-service:latest
     container_name: product-service
     ports:
       - "8082:8082"
@@ -145,6 +160,9 @@ services:
     build:
       context: ./backend/order-service
       dockerfile: Dockerfile
+      cache_from:
+        - order-service:latest
+    image: order-service:latest
     container_name: order-service
     ports:
       - "8083:8083"
@@ -171,6 +189,9 @@ services:
     build:
       context: ./backend/api-gateway
       dockerfile: Dockerfile
+      cache_from:
+        - api-gateway:latest
+    image: api-gateway:latest
     container_name: api-gateway
     ports:
       - "8080:8080"
@@ -194,6 +215,9 @@ services:
     build:
       context: ./frontend/react-app
       dockerfile: Dockerfile
+      cache_from:
+        - frontend:latest
+    image: frontend:latest
     container_name: frontend
     ports:
       - "3000:80"

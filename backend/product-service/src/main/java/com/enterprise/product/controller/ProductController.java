@@ -112,13 +112,13 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}/stock")
+    @PutMapping("/{id}/stock")
     @Operation(summary = "Update product stock")
     public ResponseEntity<Void> updateStock(
             @PathVariable Long id,
             @RequestParam Integer quantity) {
         
-        log.info("PATCH /products/{}/stock?quantity={}", id, quantity);
+        log.info("PUT /products/{}/stock?quantity={}", id, quantity);
         productService.updateStock(id, quantity);
         return ResponseEntity.ok().build();
     }

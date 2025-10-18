@@ -5,6 +5,9 @@ import { productService } from '../services/productService'
 import { orderService } from '../services/orderService'
 import { useAuthStore } from '../store/authStore'
 import { ShoppingCart, Loader, ArrowLeft } from 'lucide-react'
+import { motion } from 'framer-motion'
+import ProductModel3D from '../components/3d/ProductModel3D'
+import FadeInSection from '../components/animations/FadeInSection'
 
 const ProductDetail = () => {
   const { id } = useParams()
@@ -65,37 +68,62 @@ const ProductDetail = () => {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <button
+      <motion.button
         onClick={() => navigate('/products')}
         className="flex items-center text-blue-600 hover:text-blue-700 mb-6"
+        whileHover={{ x: -5 }}
+        whileTap={{ scale: 0.95 }}
       >
         <ArrowLeft className="h-5 w-5 mr-2" />
         Back to Products
-      </button>
+      </motion.button>
 
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      <motion.div 
+        className="bg-white rounded-lg shadow-lg overflow-hidden"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="grid md:grid-cols-2 gap-8 p-8">
-          <div className="bg-gray-200 rounded-lg flex items-center justify-center h-96">
+          <FadeInSection className="rounded-lg overflow-hidden h-96">
             {product.imageUrl ? (
-              <img
-                src={product.imageUrl}
-                alt={product.name}
-                className="w-full h-full object-cover rounded-lg"
-              />
+              <motion.div
+                className="w-full h-full bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg overflow-hidden"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.3 }}
+              >
+                <img
+                  src={product.imageUrl}
+                  alt={product.name}
+                  className="w-full h-full object-cover rounded-lg"
+                />
+              </motion.div>
             ) : (
-              <span className="text-gray-400 text-8xl">📦</span>
+              <div className="w-full h-full bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg">
+                <ProductModel3D color="#4F46E5" />
+              </div>
             )}
-          </div>
+          </FadeInSection>
 
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <FadeInSection delay={0.2}>
+            <motion.h1 
+              className="text-4xl font-bold text-gray-900 mb-4"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
               {product.name}
-            </h1>
+            </motion.h1>
 
             {product.category && (
-              <span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm mb-4">
+              <motion.span 
+                className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm mb-4"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: 0.4 }}
+              >
                 {product.category}
-              </span>
+              </motion.span>
             )}
 
             <p className="text-gray-600 text-lg mb-6">
@@ -136,19 +164,21 @@ const ProductDetail = () => {
               />
             </div>
 
-            <button
+            <motion.button
               onClick={handleOrder}
               disabled={!product.active || product.stock < 1 || createOrderMutation.isPending}
               className="w-full bg-blue-600 text-white py-4 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 flex items-center justify-center space-x-2"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               <ShoppingCart className="h-5 w-5" />
               <span>
                 {createOrderMutation.isPending ? 'Processing...' : 'Order Now'}
               </span>
-            </button>
-          </div>
+            </motion.button>
+          </FadeInSection>
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }

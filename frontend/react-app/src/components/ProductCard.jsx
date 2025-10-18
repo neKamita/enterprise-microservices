@@ -1,20 +1,46 @@
 import { Link } from 'react-router-dom'
 import { ShoppingCart } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 const ProductCard = ({ product }) => {
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
-      <div className="h-48 bg-gray-200 flex items-center justify-center">
+    <motion.div 
+      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -8, transition: { duration: 0.2 } }}
+      transition={{ duration: 0.5 }}
+    >
+      <motion.div 
+        className="h-48 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center overflow-hidden"
+        whileHover={{ scale: 1.05 }}
+        transition={{ duration: 0.3 }}
+      >
         {product.imageUrl ? (
-          <img
+          <motion.img
             src={product.imageUrl}
             alt={product.name}
             className="w-full h-full object-cover"
+            whileHover={{ scale: 1.1 }}
+            transition={{ duration: 0.3 }}
           />
         ) : (
-          <span className="text-gray-400 text-4xl">📦</span>
+          <motion.span 
+            className="text-gray-400 text-4xl"
+            animate={{ 
+              rotate: [0, 5, -5, 0],
+              scale: [1, 1.1, 1]
+            }}
+            transition={{ 
+              duration: 2,
+              repeat: Infinity,
+              repeatType: "reverse"
+            }}
+          >
+            📦
+          </motion.span>
         )}
-      </div>
+      </motion.div>
 
       <div className="p-4">
         <h3 className="text-lg font-semibold text-gray-800 mb-2 truncate">
@@ -40,15 +66,20 @@ const ProductCard = ({ product }) => {
           </span>
         )}
 
-        <Link
-          to={`/products/${product.id}`}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition flex items-center justify-center space-x-2"
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
-          <ShoppingCart className="h-4 w-4" />
-          <span>View Details</span>
-        </Link>
+          <Link
+            to={`/products/${product.id}`}
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition flex items-center justify-center space-x-2"
+          >
+            <ShoppingCart className="h-4 w-4" />
+            <span>View Details</span>
+          </Link>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 
