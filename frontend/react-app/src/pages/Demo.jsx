@@ -2,7 +2,6 @@ import { motion } from 'framer-motion'
 import ProductModel3D from '../components/3d/ProductModel3D'
 import HeroScene3D from '../components/3d/HeroScene3D'
 import FloatingIcons3D from '../components/3d/FloatingIcons3D'
-import ParticleBackground from '../components/animations/ParticleBackground'
 import AnimatedCard from '../components/animations/AnimatedCard'
 import FadeInSection from '../components/animations/FadeInSection'
 import GradientOrb from '../components/animations/GradientOrb'
@@ -13,8 +12,6 @@ import GradientOrb from '../components/animations/GradientOrb'
 const Demo = () => {
   return (
     <>
-      <ParticleBackground particleCount={300} />
-      
       <div className="max-w-7xl mx-auto relative">
         <FadeInSection>
           <h1 className="text-5xl font-bold text-gray-900 mb-4 text-center">

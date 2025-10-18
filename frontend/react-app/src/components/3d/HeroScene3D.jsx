@@ -51,31 +51,16 @@ function FloatingSpheres() {
  * 3D Hero Scene Component
  */
 const HeroScene3D = ({ className = '' }) => {
-  const canvasRef = useRef()
-
-  useEffect(() => {
-    return () => {
-      // Cleanup WebGL context on unmount
-      if (canvasRef.current) {
-        const canvas = canvasRef.current.querySelector('canvas')
-        if (canvas) {
-          const gl = canvas.getContext('webgl') || canvas.getContext('webgl2')
-          if (gl) {
-            gl.getExtension('WEBGL_lose_context')?.loseContext()
-          }
-        }
-      }
-    }
-  }, [])
-
   return (
-    <div ref={canvasRef} className={`w-full h-full ${className}`}>
+    <div className={`w-full h-full ${className}`}>
       <Canvas 
         camera={{ position: [0, 0, 10], fov: 75 }}
         gl={{ 
           preserveDrawingBuffer: false,
-          powerPreference: 'high-performance'
+          powerPreference: 'high-performance',
+          antialias: true
         }}
+        dpr={[1, 2]}
       >
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} />

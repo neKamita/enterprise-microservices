@@ -2,23 +2,20 @@ import { Link } from 'react-router-dom'
 import { Package, ShoppingCart, TrendingUp } from 'lucide-react'
 import { motion } from 'framer-motion'
 import HeroScene3D from '../components/3d/HeroScene3D'
-import ParticleBackground from '../components/animations/ParticleBackground'
 import AnimatedCard from '../components/animations/AnimatedCard'
 import FadeInSection from '../components/animations/FadeInSection'
 
 const Home = () => {
   return (
     <>
-      <ParticleBackground particleCount={500} />
-      
       <div className="max-w-6xl mx-auto relative">
         {/* Hero Section with 3D Background */}
         <div className="relative mb-12">
-          <div className="absolute inset-0 h-96 -z-10">
+          <div className="absolute inset-0 h-96 pointer-events-none">
             <HeroScene3D />
           </div>
           
-          <FadeInSection className="text-center pt-32 pb-16">
+          <FadeInSection className="text-center pt-32 pb-16 relative z-10">
             <motion.h1 
               className="text-6xl font-bold text-gray-900 mb-4"
               initial={{ opacity: 0, y: -20 }}

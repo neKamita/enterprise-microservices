@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, PerspectiveCamera, Environment, Float } from '@react-three/drei'
 import * as THREE from 'three'
@@ -35,31 +35,16 @@ function ProductBox({ color = '#4F46E5' }) {
  * 3D Product Model Viewer Component
  */
 const ProductModel3D = ({ color = '#4F46E5', className = '' }) => {
-  const canvasRef = useRef()
-
-  useEffect(() => {
-    return () => {
-      // Cleanup WebGL context on unmount
-      if (canvasRef.current) {
-        const canvas = canvasRef.current.querySelector('canvas')
-        if (canvas) {
-          const gl = canvas.getContext('webgl') || canvas.getContext('webgl2')
-          if (gl) {
-            gl.getExtension('WEBGL_lose_context')?.loseContext()
-          }
-        }
-      }
-    }
-  }, [])
-
   return (
-    <div ref={canvasRef} className={`w-full h-full ${className}`}>
+    <div className={`w-full h-full ${className}`}>
       <Canvas 
         shadows
         gl={{ 
           preserveDrawingBuffer: false,
-          powerPreference: 'high-performance'
+          powerPreference: 'high-performance',
+          antialias: true
         }}
+        dpr={[1, 2]}
       >
         <PerspectiveCamera makeDefault position={[0, 0, 6]} />
         

@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Float, Text3D, Center } from '@react-three/drei'
 import * as THREE from 'three'
@@ -40,36 +40,22 @@ function FloatingShape({ position, color, shape = 'box' }) {
  * Scene with multiple floating 3D shapes
  */
 const FloatingIcons3D = ({ className = '' }) => {
-  const canvasRef = useRef()
   const shapes = [
     { position: [-2, 1, 0], color: '#3B82F6', shape: 'box' },
     { position: [2, -1, 0], color: '#8B5CF6', shape: 'sphere' },
     { position: [0, 0, -2], color: '#EC4899', shape: 'torus' },
   ]
 
-  useEffect(() => {
-    return () => {
-      // Cleanup WebGL context on unmount
-      if (canvasRef.current) {
-        const canvas = canvasRef.current.querySelector('canvas')
-        if (canvas) {
-          const gl = canvas.getContext('webgl') || canvas.getContext('webgl2')
-          if (gl) {
-            gl.getExtension('WEBGL_lose_context')?.loseContext()
-          }
-        }
-      }
-    }
-  }, [])
-
   return (
-    <div ref={canvasRef} className={`w-full h-full ${className}`}>
+    <div className={`w-full h-full ${className}`}>
       <Canvas 
         camera={{ position: [0, 0, 8], fov: 50 }}
         gl={{ 
           preserveDrawingBuffer: false,
-          powerPreference: 'high-performance'
+          powerPreference: 'high-performance',
+          antialias: true
         }}
+        dpr={[1, 2]}
       >
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} />
