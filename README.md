@@ -1,10 +1,68 @@
 # Enterprise Microservices Application
 
-Полноценное микросервисное приложение с Java Spring Boot backend и React frontend.
+Полноценное микросервисное приложение с Java Spring Boot backend и React frontend с 3D визуализацией.
 
 ## 🏗️ Архитектура
 
-### Backend Микросервисы (Spring Boot 3.2)
+```mermaid
+graph TB
+    subgraph "Client Layer"
+        FE[React Frontend<br/>Port 3000]
+    end
+    
+    subgraph "Gateway Layer"
+        GW[API Gateway<br/>Port 8080<br/>JWT Auth & Routing]
+    end
+    
+    subgraph "Service Discovery"
+        EUR[Eureka Server<br/>Port 8761]
+        CFG[Config Server<br/>Port 8888]
+    end
+    
+    subgraph "Business Services"
+        US[User Service<br/>Port 8081]
+        PS[Product Service<br/>Port 8082]
+        OS[Order Service<br/>Port 8083]
+    end
+    
+    subgraph "Data Layer"
+        DB1[(PostgreSQL<br/>userdb:5432)]
+        DB2[(PostgreSQL<br/>productdb:5433)]
+        DB3[(PostgreSQL<br/>orderdb:5434)]
+    end
+    
+    FE -->|HTTP/REST| GW
+    GW -->|Routes| US
+    GW -->|Routes| PS
+    GW -->|Routes| OS
+    
+    US -.->|Register| EUR
+    PS -.->|Register| EUR
+    OS -.->|Register| EUR
+    GW -.->|Discover| EUR
+    
+    US -.->|Config| CFG
+    PS -.->|Config| CFG
+    OS -.->|Config| CFG
+    GW -.->|Config| CFG
+    
+    US -->|JPA| DB1
+    PS -->|JPA| DB2
+    OS -->|JPA| DB3
+    
+    OS -.->|Feign Client| US
+    OS -.->|Feign Client| PS
+    
+    style FE fill:#61dafb
+    style GW fill:#ff6b6b
+    style EUR fill:#4ecdc4
+    style CFG fill:#95e1d3
+    style US fill:#a8e6cf
+    style PS fill:#ffd3b6
+    style OS fill:#ffaaa5
+```
+
+### Backend Микросервисы (Spring Boot 3.4.10)
 
 1. **Config Server** (Port 8888)
    - Централизованная конфигурация для всех сервисов
@@ -39,26 +97,43 @@
    - Интеграция с User и Product Service через Feign Client
    - PostgreSQL database (orderdb)
 
-### Frontend (React 18 + Vite)
+### Frontend (React 18 + Vite 6)
 
 - **Технологии:**
-  - React 18
-  - Vite
-  - React Router v6
+  - React 18.3
+  - Vite 6.0
+  - React Router v7.8
   - Axios
   - Zustand (state management)
-  - TanStack Query (React Query)
-  - TailwindCSS
+  - TanStack Query v5 (React Query)
+  - TailwindCSS 3.4
   - React Hook Form
   - Lucide Icons
+  - **Three.js 0.171** - 3D графика
+  - **@react-three/fiber** - React renderer для Three.js
+  - **@react-three/drei** - Helpers для Three.js
+  - **Framer Motion 12** - Анимации
 
 - **Страницы:**
-  - Home - Главная страница
+  - Home - Главная страница с 3D hero scene
+  - Demo - Showcase 3D компонентов и анимаций
   - Login/Register - Аутентификация
-  - Products - Каталог продуктов
-  - ProductDetail - Детали продукта
+  - Products - Каталог продуктов с анимациями
+  - ProductDetail - Детали продукта с 3D моделью
   - Orders - История заказов
   - Profile - Профиль пользователя
+
+- **3D Компоненты:**
+  - `HeroScene3D` - 3D сцена для главной страницы
+  - `FloatingIcons3D` - Анимированные 3D иконки
+  - `ProductModel3D` - 3D модели продуктов
+
+- **Анимационные Компоненты:**
+  - `AnimatedCard` - Карточки с анимацией
+  - `FadeInSection` - Плавное появление секций
+  - `GradientOrb` - Анимированные градиентные сферы
+  - `PageTransition` - Переходы между страницами
+  - `ParticleBackground` - Фоновые частицы
 
 ## 🚀 Быстрый старт
 
@@ -153,9 +228,89 @@ PATCH  /api/orders/{id}/status      - Обновить статус
 DELETE /api/orders/{id}             - Отменить заказ
 ```
 
+## 🔄 Data Flow
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant F as Frontend
+    participant G as API Gateway
+    participant E as Eureka
+    participant US as User Service
+    participant PS as Product Service
+    participant OS as Order Service
+    participant DB as PostgreSQL
+    
+    Note over U,DB: User Authentication Flow
+    U->>F: Login Request
+    F->>G: POST /api/auth/login
+    G->>E: Discover User Service
+    E-->>G: Service Location
+    G->>US: Forward Auth Request
+    US->>DB: Validate Credentials
+    DB-->>US: User Data
+    US-->>G: JWT Token
+    G-->>F: JWT Token
+    F-->>U: Login Success
+    
+    Note over U,DB: Create Order Flow
+    U->>F: Create Order
+    F->>G: POST /api/orders (JWT)
+    G->>G: Validate JWT
+    G->>E: Discover Order Service
+    E-->>G: Service Location
+    G->>OS: Forward Request
+    OS->>US: Get User (Feign)
+    US-->>OS: User Data
+    OS->>PS: Get Product (Feign)
+    PS-->>OS: Product Data
+    OS->>DB: Save Order
+    DB-->>OS: Order Saved
+    OS-->>G: Order Created
+    G-->>F: Success Response
+    F-->>U: Order Confirmation
+```
+
 ## 🔐 Аутентификация
 
 Приложение использует JWT токены для аутентификации.
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant GW as API Gateway
+    participant US as User Service
+    participant DB as PostgreSQL
+    
+    Note over C,DB: Registration
+    C->>GW: POST /api/auth/register
+    GW->>US: Forward Request
+    US->>US: Hash Password (BCrypt)
+    US->>DB: Save User
+    DB-->>US: User Created
+    US-->>GW: Success
+    GW-->>C: 201 Created
+    
+    Note over C,DB: Login & Token Generation
+    C->>GW: POST /api/auth/login
+    GW->>US: Forward Credentials
+    US->>DB: Find User by Username
+    DB-->>US: User Entity
+    US->>US: Verify Password
+    US->>US: Generate JWT Token<br/>(HS256, 24h expiry)
+    US-->>GW: JWT Token
+    GW-->>C: Token Response
+    
+    Note over C,DB: Protected Resource Access
+    C->>GW: GET /api/users/profile<br/>Header: Bearer TOKEN
+    GW->>GW: Validate JWT Signature
+    GW->>GW: Check Expiration
+    GW->>US: Forward Request
+    US->>DB: Get User Data
+    DB-->>US: User Data
+    US-->>GW: Response
+    GW-->>C: User Profile
+```
 
 ### Получение токена
 
@@ -192,6 +347,55 @@ curl -X GET http://localhost:8080/api/users/1 \
 - Order Service: http://localhost:8083/swagger-ui.html
 
 ## 🗄️ База данных
+
+```mermaid
+erDiagram
+    USERS ||--o{ ORDERS : places
+    PRODUCTS ||--o{ ORDER_ITEMS : contains
+    ORDERS ||--|{ ORDER_ITEMS : has
+    
+    USERS {
+        bigint id PK
+        string username UK
+        string email UK
+        string password
+        string first_name
+        string last_name
+        string role
+        timestamp created_at
+        timestamp updated_at
+    }
+    
+    PRODUCTS {
+        bigint id PK
+        string name
+        text description
+        decimal price
+        int stock
+        string category
+        boolean active
+        timestamp created_at
+        timestamp updated_at
+    }
+    
+    ORDERS {
+        bigint id PK
+        bigint user_id FK
+        string status
+        decimal total_amount
+        text shipping_address
+        timestamp created_at
+        timestamp updated_at
+    }
+    
+    ORDER_ITEMS {
+        bigint id PK
+        bigint order_id FK
+        bigint product_id FK
+        int quantity
+        decimal price
+    }
+```
 
 ### PostgreSQL Instances
 
@@ -369,41 +573,138 @@ docker-compose up -d
 2. Убедитесь что API Gateway запущен
 3. Проверьте CORS настройки в Gateway
 
+## 🚢 Deployment Architecture
+
+```mermaid
+graph TB
+    subgraph "Docker Compose Environment"
+        subgraph "Frontend Container"
+            NGINX[Nginx<br/>Alpine]
+            REACT[React Build<br/>Static Files]
+        end
+        
+        subgraph "Gateway & Discovery"
+            GW[API Gateway<br/>Java 25 + Alpine]
+            EUR[Eureka Server<br/>Java 25 + Alpine]
+            CFG[Config Server<br/>Java 25 + Alpine]
+        end
+        
+        subgraph "Business Services"
+            US[User Service<br/>Java 25 + Alpine]
+            PS[Product Service<br/>Java 25 + Alpine]
+            OS[Order Service<br/>Java 25 + Alpine]
+        end
+        
+        subgraph "Data Persistence"
+            DB1[(PostgreSQL 15<br/>Alpine<br/>userdb:5432)]
+            DB2[(PostgreSQL 15<br/>Alpine<br/>productdb:5433)]
+            DB3[(PostgreSQL 15<br/>Alpine<br/>orderdb:5434)]
+        end
+        
+        subgraph "Volumes"
+            V1[postgres-user-data]
+            V2[postgres-product-data]
+            V3[postgres-order-data]
+        end
+    end
+    
+    NGINX --> REACT
+    NGINX -->|Port 3000:80| Internet
+    GW -->|Port 8080| Internet
+    EUR -->|Port 8761| Internet
+    
+    US --> DB1
+    PS --> DB2
+    OS --> DB3
+    
+    DB1 -.-> V1
+    DB2 -.-> V2
+    DB3 -.-> V3
+    
+    style NGINX fill:#269f42
+    style GW fill:#ff6b6b
+    style EUR fill:#4ecdc4
+    style CFG fill:#95e1d3
+    style US fill:#a8e6cf
+    style PS fill:#ffd3b6
+    style OS fill:#ffaaa5
+    style DB1 fill:#336791
+    style DB2 fill:#336791
+    style DB3 fill:#336791
+```
+
+### Build Optimization
+
+```mermaid
+graph LR
+    subgraph "Multi-Stage Build Process"
+        A[Source Code] --> B[Stage 1: Maven Build<br/>Cache Dependencies]
+        B --> C[Stage 2: Compile & Package<br/>JAR Creation]
+        C --> D[Stage 3: Runtime Image<br/>Alpine JRE 25]
+        
+        E[React Source] --> F[Stage 1: npm install<br/>Cache node_modules]
+        F --> G[Stage 2: Vite Build<br/>Production Bundle]
+        G --> H[Stage 3: Nginx Alpine<br/>Serve Static Files]
+    end
+    
+    style A fill:#f9f9f9
+    style E fill:#f9f9f9
+    style D fill:#a8e6cf
+    style H fill:#61dafb
+```
+
+**Оптимизации:**
+- ✅ BuildKit для параллельной сборки
+- ✅ Multi-stage builds (размер образов -37%)
+- ✅ Layer caching для зависимостей
+- ✅ Alpine images для минимального размера
+- ✅ Первая сборка: ~15-20 мин, повторная: ~3-5 мин (70% быстрее)
+
 ## 📝 Технологический стек
 
 ### Backend
-- Java 17
-- Spring Boot 3.2.0
-- Spring Cloud 2023.0.0
-- Spring Security + JWT
+
+- **Java 25** (Oracle JDK)
+- **Spring Boot 3.4.10**
+- **Spring Cloud 2024.0.0**
+- Spring Security + JWT 0.12.3
 - Spring Data JPA
-- PostgreSQL 15
-- MapStruct
+- **PostgreSQL 15** (Alpine)
+- **MapStruct 1.5.5**
 - Lombok
 - OpenAPI/Swagger
-- Maven
+- Maven 3.9+
 
 ### Frontend
-- React 18
-- Vite 5
-- React Router 6
-- Axios
-- Zustand
-- TanStack Query
-- TailwindCSS 3
-- React Hook Form
-- Lucide Icons
+
+- **React 18.3**
+- **Vite 6.0**
+- **React Router 7.8**
+- Axios 1.7
+- Zustand 5.0
+- **TanStack Query 5.62**
+- **TailwindCSS 3.4**
+- React Hook Form 7.54
+- **Lucide Icons 0.469**
+- **Three.js 0.171**
+- **@react-three/fiber 8.17**
+- **@react-three/drei 9.117**
+- **Framer Motion 12.23**
+- **Playwright 1.56** (E2E Testing)
 
 ### DevOps
+
 - Docker with BuildKit
-- Docker Compose
+- Docker Compose 3.8
 - Multi-stage builds
 - Layer caching optimization
-- Nginx
+- **Nginx Alpine** (Frontend)
+- **Alpine Linux** (All containers)
 
 ## 🎯 Особенности
 
 ### Backend
+
 - ✅ Микросервисная архитектура
 - ✅ Service Discovery (Eureka)
 - ✅ API Gateway с JWT аутентификацией
@@ -415,21 +716,38 @@ docker-compose up -d
 - ✅ Валидация данных
 - ✅ Пагинация
 - ✅ Swagger документация
+- ✅ Health checks & Actuator endpoints
 
 ### Frontend
-- ✅ Responsive UI
-- ✅ Protected routes
+
+- ✅ **3D визуализация** (Three.js + React Three Fiber)
+  - Интерактивные 3D сцены
+  - Анимированные 3D модели продуктов
+  - Floating 3D иконки
+- ✅ **Продвинутые анимации** (Framer Motion)
+  - Page transitions
+  - Animated cards
+  - Gradient orbs
+  - Particle backgrounds
+  - Fade-in sections
+- ✅ Responsive UI (Mobile-first)
+- ✅ Protected routes с JWT
 - ✅ State management (Zustand)
-- ✅ API caching (TanStack Query)
-- ✅ Modern React patterns
+- ✅ API caching & optimistic updates (TanStack Query)
+- ✅ Modern React patterns (Hooks, Context)
+- ✅ Form validation (React Hook Form)
+- ✅ **E2E Testing** (Playwright)
 
 ### DevOps
+
 - ✅ Оптимизированная Docker сборка (BuildKit)
 - ✅ Multi-stage builds с кэшированием
 - ✅ Минимальные runtime образы (Alpine)
 - ✅ Автоматическое кэширование зависимостей
 - ✅ Параллельная сборка сервисов
 - ✅ Уменьшенный размер образов (~37%)
+- ✅ Health checks для всех сервисов
+- ✅ Volume persistence для баз данных
 
 ## 📄 Лицензия
 
